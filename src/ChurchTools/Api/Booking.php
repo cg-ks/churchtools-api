@@ -151,6 +151,15 @@ class Booking extends CTObject
     {
         return $this->remarks;
     }
+
+    /**
+     * Experimental feature to set the remark. This does not directly update churchtools.
+     * To sync this local instance with churchtools, call sync.
+     */
+    public function setRemarks(string $remarks)
+    {
+        $this->remarks = $remarks;
+    }
     
     /**
      * @return \DateTime start date of calendar entry
@@ -228,5 +237,36 @@ class Booking extends CTObject
     public function getCalendarID(): ?int
     {
         return $this->calendarID;
+    }
+
+    /**
+     * Experimental feature to sync this local instance and all its changes back to churchtools
+     */
+    public function sync() {
+        // The param array of all class variables
+        $paramArray = [
+            'startdate' => $this->getStartDate()->format('Y-m-d H:i:s'),
+            'enddate' => $this->getEndDate()->format('Y-m-d H:i:s'),
+            'name' => "Booking",
+            'id' => $this->getID(),
+            'resource_id' => $this->getResourceID(),
+            'person_id' => $this->getPersonID(),
+            'status_id' => $this->getStatusID(),
+            'text' => $this->getTitle(),
+            'location' => $this->getLocation(),
+            'note'  => $remarks,
+            'modified_date' => (new \DateTime('now', new \DateTimeZone(Config::$TIMEZONE)))->format('Y-m-d H:i:s'),
+            'create_date' => $this->getCreateDate()->format('Y-m-d H:i:s'),
+            'version' => $this->getVersion(),
+            'neu' => 'false',
+            'func' => 'updateBooking',
+            'currentEvent_id' => $this->getID(),
+        ];
+
+        // Add the raw data blocks
+        $paramArray = array_merge($param_array, $this->rawDataBlocks);
+        // Now call the API
+        $rawData = $this->_api->callApi('churchresource/ajax', $paramArray);
+        return $rawData;
     }
 }
