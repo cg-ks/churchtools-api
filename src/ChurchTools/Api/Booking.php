@@ -241,8 +241,9 @@ class Booking extends CTObject
 
     /**
      * Experimental feature to sync this local instance and all its changes back to churchtools
+     * @param RestAPI The churchtools RestAPI instance that should perform the sync call
      */
-    public function sync() {
+    public function sync($api) {
         // The param array of all class variables
         $paramArray = [
             'startdate' => $this->getStartDate()->format('Y-m-d H:i:s'),
@@ -254,8 +255,8 @@ class Booking extends CTObject
             'status_id' => $this->getStatusID(),
             'text' => $this->getTitle(),
             'location' => $this->getLocation(),
-            'note'  => $remarks,
-            'modified_date' => (new \DateTime('now', new \DateTimeZone(Config::$TIMEZONE)))->format('Y-m-d H:i:s'),
+            'note'  => $this->remarks,
+            'modified_date' => (new \DateTime('now'))->format('Y-m-d H:i:s'),
             'create_date' => $this->getCreateDate()->format('Y-m-d H:i:s'),
             'version' => $this->getVersion(),
             'neu' => 'false',
@@ -264,9 +265,9 @@ class Booking extends CTObject
         ];
 
         // Add the raw data blocks
-        $paramArray = array_merge($param_array, $this->rawDataBlocks);
+        $paramArray = array_merge($paramArray, $this->rawDataBlocks);
         // Now call the API
-        $rawData = $this->_api->callApi('churchresource/ajax', $paramArray);
+        $rawData = $api->callApi('churchresource/ajax', $paramArray);
         return $rawData;
     }
 }

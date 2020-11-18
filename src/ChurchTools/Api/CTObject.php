@@ -21,7 +21,7 @@ use DateTime;
  */
 abstract class CTObject
 {
-    private $rawDataBlocks; // Contains all data blocks we did not know how to parse
+    protected $rawDataBlocks; // Contains all data blocks we did not know how to parse
 
     /**
      * Parses the rewData arrays and constructs the object tree as far as possible
