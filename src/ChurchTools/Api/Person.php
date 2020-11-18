@@ -44,7 +44,7 @@ class Person extends CTObject
                 $this->firstName       = $blockData;
                 break;
             case 'em':
-                $this->email        = intval($blockData);
+                $this->email        = $blockData;
                 break;
             case 'active_yn':
                 $this->active        = $blockData == "1";

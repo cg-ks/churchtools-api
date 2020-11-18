@@ -176,6 +176,30 @@ class Booking extends CTObject
         return $this->title;
     }
 
+    /**
+     * @return int the id of the person who did the booking
+     */
+    public function getPersonID(): int
+    {
+        return $this->personID;
+    }
+    
+    /**
+     * @return the version this booking information is based on
+     */
+    public function getVersion()
+    {
+        return $this->version;
+    }
+
+    /**
+     * @return DateTime the time this booking has been created
+     */
+    public function getCreateDate()
+    {
+        return $this->createDate;
+    }
+
     public function isConfirmed(): bool
     {
         return BookingStatusType::isConfirmed($this->statusID);
