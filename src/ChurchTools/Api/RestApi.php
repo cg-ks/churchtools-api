@@ -314,7 +314,7 @@ class RestApi
      * @return array
      * @throws JsonDecodingException
      */
-    private function callApi(string $apiRoute, array $data = []): array
+    public function callApi(string $apiRoute, array $data = []): array
     {
         $response = $this->guzzleClient->post($this->getApiUrl($apiRoute), $this->getRequestOptions($data));
         if ($response->getStatusCode() !== 200) {
