@@ -171,6 +171,27 @@ class RestApi
         return $retVal;
     }
 
+    public function getCalendarPerCategory(array $categoryIds): array
+    {
+        $retVal= [];
+        $rawData= $this->callApi(self::CALENDAR_ROUTE, [
+            'func' => 'getCalPerCategory',
+            'category_ids' => $categoryIds
+        ]);
+
+        foreach ($rawData['data'] as $categoryId => $entries){
+            if (!array_key_exists($categoryId, $retVal)) {
+                $retVal[$categoryId] = [];
+            }
+            foreach ($entries as $eventData) {
+                $e = new CalendarEntry($eventData, false);
+                $retVal[$categoryId][$e->getID()] = $e;
+            }
+        }
+        
+        return $retVal;
+    }
+
     /**
      * Get all resource bookings
      *

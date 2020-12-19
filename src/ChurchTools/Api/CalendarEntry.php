@@ -4,14 +4,16 @@ declare(strict_types=1);
 namespace ChurchTools\Api;
 
 use ChurchTools\Api\Booking;
+use ChurchTools\Api\MeetingRequest;
 
 /**
  * A single calendarentry, with bookings if any
  *
- * @author André Schild
+ * @author André Schild, Lukas Block
  */
 class CalendarEntry extends CTObject
 {
+    private $id;
     private $startDate;
     private $endDate;
     private $title;
@@ -21,6 +23,7 @@ class CalendarEntry extends CTObject
     private $moreInfos;
     private $link;
     private $bookings;
+    private $meetingRequests;
 
     /**
      * @overridedoc
@@ -28,6 +31,9 @@ class CalendarEntry extends CTObject
     protected function handleDataBlock($blockName, $blockData): void
     {
         switch ($blockName) {
+            case 'id':
+                $this->id = intval($blockData);
+            break;
             case 'startdate':
                 $this->startDate    = $this->parseDateTime($blockData);
                 break;
@@ -62,9 +68,26 @@ class CalendarEntry extends CTObject
                 }
                 $this->bookings = $bookings;
                 break;
+            case 'meetingRequest':
+                $meetingRequests = [];
+                foreach ($blockData as $key => $b) {
+                    $b_new = [];
+                    $b_new["data"] = $b;
+                    $meetingRequests[] = new MeetingRequest($b_new);
+                }
+                $this->meetingRequests = $meetingRequests;
+                break;
             default:
                 parent::handleDataBlock($blockName, $blockData);
         }
+    }
+
+    /**
+     * @return \int id of this calendar entry
+     */
+    public function getID(): int
+    {
+        return $this->id;
     }
 
     /**
@@ -140,4 +163,14 @@ class CalendarEntry extends CTObject
     {
         return $this->bookings;
     }
+
+    /**
+     *
+     * @return array Meeting requests associated with this calendar entry
+     */
+    public function getMeetingRequests(): ?array
+    {
+        return $this->meetingRequests;
+    }
 }
+
