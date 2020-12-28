@@ -11,7 +11,7 @@ use ChurchTools\Api\MeetingRequest;
  *
  * @author André Schild, Lukas Block
  */
-class CalendarEntry extends CTObject
+class CalendarEntry extends CTRepeatingObject
 {
     private $id;
     private $startDate;

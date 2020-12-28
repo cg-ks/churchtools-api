@@ -8,7 +8,7 @@ namespace ChurchTools\Api;
  *
  * @author André Schild
  */
-class Booking extends CTObject
+class Booking extends CTRepeatingObject
 {
     private $id;
     private $preTime;

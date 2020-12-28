@@ -92,8 +92,8 @@ class RepeatingType extends CTObject
         return $id == 365;
     }
     
-    public static function isManualRepeat(): bool
+    public static function isManualRepeat($id): bool
     {
-        return $this->statusID == 999;
+        return $id == 999;
     }
 }
