@@ -213,6 +213,27 @@ class RestApi
     }
     
     /**
+     * Get all logs for a certain booking
+     *
+     * @param integer $bookingId The id of the booking, for which to request the logs
+     * @return array An array of the single logs, each of instance BookingLog
+     */
+    public function getBookingLogs(int $bookingId) : array
+    {
+        $retVal= [];
+        $rawData= $this->callApi(self::RESOURCE_ROUTE, [
+            'func' => 'getLogs',
+            'id' => $bookingId
+        ]);
+        
+        foreach ($rawData['data'] as $bookingLogData) {
+            $e= new BookingLog($bookingLogData, false);
+            array_push($retVal, $e);
+        }
+        return $retVal;
+    }
+
+    /**
      * Get all event data including services
      *
      * @return array
