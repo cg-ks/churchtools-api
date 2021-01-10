@@ -79,7 +79,7 @@ class MeetingRequest extends CTObject
         if (is_null($this->confirmed)) {
             return null;
         } else {
-            return $this->isConfirmed;
+            return $this->isConfirmed();
         }
     }
 
