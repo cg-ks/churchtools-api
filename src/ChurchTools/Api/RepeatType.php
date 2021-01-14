@@ -16,6 +16,7 @@ class RepeatType
     private $frequency;
     private $optionId;
     private $endDate;
+    private $additions;
     
 
     /**
@@ -29,6 +30,7 @@ class RepeatType
         $this->frequency = $frequency;
         $this->optionId = $optionId;
         $this->endDate = $endDate;
+        $this->additions = [];
     }
 
     /**
@@ -67,6 +69,39 @@ class RepeatType
         return $this->endDate;
     }
 
+    public function addAddition(AdditionalRepeatDate $ard) {
+        $this->additions[$ard->getId()] = $ard;
+    }
+
+    public function getAdditions() {
+        return $this->additions;
+    }
+
+    /**
+     * Returns the last Date Time object of this repeat type. This can be
+     * the end date, but if additional dates are present it might also be the
+     * an additional date, which is later than the end date of the regular
+     * recurrence
+     *
+     * @return date time object
+     */
+    public function getLastDate() {
+        if ($this->isNoRepeat()) {
+            return False;
+        }
+
+        // Just get the latest date
+        $lastDate = $this->endDate;
+
+        // Check if one of the additional dates is later than the end date of the recurrence
+        foreach ($this->additions as $add) {
+            if ($lastDate < $add->getDate()) {
+                $lastDate = $add->getDate();
+            }
+        } 
+
+        return clone $lastDate;
+    }
 
     public function isNoRepeat(): bool
     {

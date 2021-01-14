@@ -44,6 +44,10 @@ class CTRepeatingObject extends CTObject
             case 'repeat_until':
                 $this->repeatType->setEndDate($this->parseDateTime($blockData));
             break;
+            case 'additions':
+                foreach ($blockData as $ard) {
+                    $this->repeatType->addAddition(new AdditionalRepeatDate(array("data" => $ard)));
+                }
             default:
                 parent::handleDataBlock($blockName, $blockData);
         }
