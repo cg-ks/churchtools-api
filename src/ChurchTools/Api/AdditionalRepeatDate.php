@@ -13,6 +13,7 @@ class AdditionalRepeatDate extends CTObject
 {
     private $id;
     private $date;
+    private $repeat = False;
     
 
     /**
@@ -27,6 +28,8 @@ class AdditionalRepeatDate extends CTObject
             case 'add_date':
                 $this->date = $this->parseDateTime($blockData);
                 break;
+            case 'with_repeat_yn':
+                $this->repeat = boolval($blockData);
             default:
                 parent::handleDataBlock($blockName, $blockData);
         }
@@ -46,5 +49,13 @@ class AdditionalRepeatDate extends CTObject
     public function getDate()
     {
         return $this->date;
+    }
+
+    /**
+     * Get the value of repeat
+     */ 
+    public function isRepeat()
+    {
+        return $this->repeat;
     }
 }

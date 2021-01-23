@@ -19,8 +19,6 @@ class Booking extends CTRepeatingObject
     private $remarks;
     private $title;
     private $personID;
-    private $startDate;
-    private $endDate;
     private $createDate;
     private $modifiedDate;
     private $version;
@@ -72,12 +70,6 @@ class Booking extends CTRepeatingObject
                 break;
             case 'version':
                 $this->version       = $blockData;
-                break;
-            case 'startdate':
-                $this->startDate    = $this->parseDateTime($blockData);
-                break;
-            case 'enddate':
-                $this->endDate      = $this->parseDateTime($blockData);
                 break;
             case 'create_date':
                 $this->createDate    = $this->parseDateTime($blockData);
@@ -159,22 +151,6 @@ class Booking extends CTRepeatingObject
     public function setRemarks(string $remarks)
     {
         $this->remarks = $remarks;
-    }
-    
-    /**
-     * @return \DateTime start date of calendar entry
-     */
-    public function getStartDate(): \DateTime
-    {
-        return $this->startDate;
-    }
-
-    /**
-     * @return date end date of calenda entry
-     */
-    public function getEndDate(): \DateTime
-    {
-        return $this->endDate;
     }
 
     /**

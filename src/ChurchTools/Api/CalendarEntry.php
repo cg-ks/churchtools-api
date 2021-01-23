@@ -14,8 +14,6 @@ use ChurchTools\Api\MeetingRequest;
 class CalendarEntry extends CTRepeatingObject
 {
     private $id;
-    private $startDate;
-    private $endDate;
     private $title;
     private $calendarID;
     private $calendarName;
@@ -34,10 +32,8 @@ class CalendarEntry extends CTRepeatingObject
             case 'id':
                 $this->id = intval($blockData);
             break;
-            case 'startdate':
-                $this->startDate    = $this->parseDateTime($blockData);
-                break;
             case 'enddate':
+                // Overriden here to take care of full day events
                 $this->endDate      = $this->parseDateTime($blockData);
                 if ($this->isFullDayEvent($this->startDate, $this->endDate)) {
                     $this->endDate= $this->makeFullDayEvent($this->endDate);
@@ -88,22 +84,6 @@ class CalendarEntry extends CTRepeatingObject
     public function getID(): int
     {
         return $this->id;
-    }
-
-    /**
-     * @return \DateTime start date of calendar entry
-     */
-    public function getStartDate(): \DateTime
-    {
-        return $this->startDate;
-    }
-
-    /**
-     * @return date end date of calenda entry
-     */
-    public function getEndDate(): \DateTime
-    {
-        return $this->endDate;
     }
 
     /**

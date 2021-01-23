@@ -12,7 +12,9 @@ namespace ChurchTools\Api;
 
 class CTRepeatingObject extends CTObject
 {
-    private $repeatType;
+    protected $repeatType;
+    protected $startDate;
+    protected $endDate;
     
 
     /**
@@ -32,6 +34,12 @@ class CTRepeatingObject extends CTObject
     protected function handleDataBlock($blockName, $blockData): void
     {
         switch ($blockName) {
+            case 'startdate':
+                $this->startDate    = $this->parseDateTime($blockData);
+                break;
+            case 'enddate':
+                $this->endDate      = $this->parseDateTime($blockData);
+                break;
             case 'repeat_id':
                 $this->repeatType->setID(intval($blockData));
                 break;
@@ -57,4 +65,27 @@ class CTRepeatingObject extends CTObject
         return $this->repeatType;
     }
 
+    public function getNextDateAfter($after) {
+        return $this->repeatType->getNextDateAfter($this->startDate, $after);
+    }
+
+    public function getNextDate() {
+        return $this->getNextDateAfter(new \DateTime());
+    }
+
+    /**
+     * Get the value of startDate
+     */ 
+    public function getStartDate()
+    {
+        return $this->startDate;
+    }
+
+    /**
+     * Get the value of endDate
+     */ 
+    public function getEndDate()
+    {
+        return $this->endDate;
+    }
 }
