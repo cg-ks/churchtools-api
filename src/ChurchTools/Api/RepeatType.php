@@ -88,7 +88,7 @@ class RepeatType
      */
     public function getLastDate() {
         if ($this->isNoRepeat() || $this->isManualRepeat() || is_null($this->endDate)) {
-            return False;
+            return false;
         }
 
         // Just get the latest date
@@ -219,11 +219,11 @@ class RepeatType
             }
         }
 
-        // Return False if we were not able to find any repetition after the given date
+        // Return false if we were not able to find any repetition after the given date
         if (!is_null($closestRepetition)) {
             return $closestRepetition;
         } else {
-            return False;
+            return false;
         }
     }
 

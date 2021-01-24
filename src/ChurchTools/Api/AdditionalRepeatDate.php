@@ -13,7 +13,7 @@ class AdditionalRepeatDate extends CTObject
 {
     private $id;
     private $date;
-    private $repeat = False;
+    private $repeat = false;
     
 
     /**
