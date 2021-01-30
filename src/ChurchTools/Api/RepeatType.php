@@ -88,7 +88,7 @@ class RepeatType
      */
     public function getLastDate() {
         if ($this->isNoRepeat() || $this->isManualRepeat() || is_null($this->endDate)) {
-            return false;
+            return False;
         }
 
         // Just get the latest date
@@ -100,6 +100,28 @@ class RepeatType
                 $lastDate = $add->getDate();
             }
         } 
+
+        return clone $lastDate;
+    }
+
+    public function getLastOccurence($startDate) {
+        if ($this->isNoRepeat() || $this->isManualRepeat() || is_null($this->endDate)) {
+            return False;
+        }
+
+        // TODO: This is an ugly approach, but easiest way to implement without code too much code alternation currently
+        // Architectural technical debt here!
+        $lastDate = $startDate;
+        $lastDateTmp = clone $startDate;
+        // Add one second, to get all dates later, than this date
+        $lastDateTmp->modify("+1 second");
+        $nextPossibleDate = $this->getNextDateAfter($startDate, $lastDateTmp);
+        while ($nextPossibleDate !== False) {
+            $lastDate = $nextPossibleDate;
+            $lastDateTmp = clone $lastDate;
+            $lastDateTmp->modify("+1 second");
+            $nextPossibleDate = $this->getNextDateAfter($startDate, $lastDateTmp);
+        }
 
         return clone $lastDate;
     }
@@ -149,6 +171,7 @@ class RepeatType
         return $this->id == 999;
     }
 
+    // TODO: Rename this function to getNextOccurenceAfter
     public function getNextDateAfter($startDate, $after)
     {
         // TODO: Does not take exception dates into account
@@ -175,39 +198,11 @@ class RepeatType
         // Calculate all potential dates via repetition
         $closestRepetition = null;
         foreach ($possibleStartDates as $start) {
-            $result = null;
-            // Now check which subroutine to call
-            if ($this->isDailyRepeat()) {
-                $result = $this->getNextDateDailyRepeatAfter($start, $after);
-            } else if ($this->isWeeklyRepeat()) {
-                $result = $this->getNextDateWeeklyRepeatAfter($start, $after);
-            } else if ($this->isMonthlyByDate()) {
-                $result = $this->getNextDateMonthlyByDateAfter($start, $after);
-            } else if ($this->isMonthlyByWeekday()) {
-                $result = $this->getNextDateMonthlyByWeekdayAfter($start, $after);
-            } else if ($this->isYearly()) {
-                $result = $this->getNextDateYearlyAfter($start, $after);
-            } else if ($this->isManualRepeat() || $this->isNoRepeat()) {
-                // Manual repeat and not repeat has no repetition, as such, it equals the possible start date
-                // If the possible start date is later than $after set it, otherwise just continue with the next possible start date
-                if ($start >= $after) {
-                    $result = $start;
-                } else {
-                    continue;
-                }
-            } else {
-                throw new BadMethodCallException("RepeatType must be of a certain repetition type!");
-            }
-
-            // Now check if the result is later than the last date to be allowed
-            $lastDate = $this->getEndDate();
-            if ((!is_null($lastDate)) && ($result > $lastDate)) {
-                continue;
-            }
-
+            // Calculate the next occurence after a certain date for the specific start date
+            $result = $this->getNextSingleOccurenceAfter($start, $after);
             // Now check if it is closer to $after, than the results before
             // The subfunctions guarantee already, that $result is later or at the same time than $after, as such we just have to compare them
-            if (is_null($closestRepetition) || ($closestRepetition > $result)) {
+            if (($result !== false) && (is_null($closestRepetition) || ($closestRepetition >= $result))) {
                 $closestRepetition = $result;
             }
         }
@@ -219,12 +214,46 @@ class RepeatType
             }
         }
 
-        // Return false if we were not able to find any repetition after the given date
+        // Return False if we were not able to find any repetition after the given date
         if (!is_null($closestRepetition)) {
             return $closestRepetition;
         } else {
+            return False;
+        }
+    }
+
+    public function getNextSingleOccurenceAfter($start, $after) {
+        $result = null;
+        // Now check which subroutine to call
+        if ($this->isDailyRepeat()) {
+            $result = $this->getNextDateDailyRepeatAfter($start, $after);
+        } else if ($this->isWeeklyRepeat()) {
+            $result = $this->getNextDateWeeklyRepeatAfter($start, $after);
+        } else if ($this->isMonthlyByDate()) {
+            $result = $this->getNextDateMonthlyByDateAfter($start, $after);
+        } else if ($this->isMonthlyByWeekday()) {
+            $result = $this->getNextDateMonthlyByWeekdayAfter($start, $after);
+        } else if ($this->isYearly()) {
+            $result = $this->getNextDateYearlyAfter($start, $after);
+        } else if ($this->isManualRepeat() || $this->isNoRepeat()) {
+            // Manual repeat and not repeat has no repetition, as such, it equals the possible start date
+            // If the possible start date is later than $after set it, otherwise just continue with the next possible start date
+            if ($start >= $after) {
+                $result = $start;
+            } else {
+                return false;
+            }
+        } else {
+            throw new \Exception("RepeatType must be of a certain repetition type!");
+        }
+
+        // Now check if the result is later than the last date to be allowed
+        $lastDate = $this->getEndDate();
+        if ((!is_null($lastDate)) && ($result > $lastDate)) {
             return false;
         }
+
+        return $result;
     }
 
     protected function getNextDateDailyRepeatAfter($startDate, $after) : \DateTime
@@ -358,3 +387,4 @@ class RepeatType
     }
 
 }
+

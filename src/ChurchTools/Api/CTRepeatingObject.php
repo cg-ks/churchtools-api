@@ -73,6 +73,10 @@ class CTRepeatingObject extends CTObject
         return $this->getNextDateAfter(new \DateTime());
     }
 
+    public function getLastOccurence() {
+        return $this->repeatType->getLastOccurence($this->startDate);
+    }
+
     /**
      * Get the value of startDate
      */ 
@@ -89,3 +93,4 @@ class CTRepeatingObject extends CTObject
         return $this->endDate;
     }
 }
+
