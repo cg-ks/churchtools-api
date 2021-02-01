@@ -17,6 +17,7 @@ class RepeatType
     private $optionId;
     private $endDate;
     private $additions;
+    private $exceptions;
     
 
     /**
@@ -30,8 +31,41 @@ class RepeatType
         $this->id = $id;
         $this->frequency = $frequency;
         $this->optionId = $optionId;
-        $this->endDate = $endDate;
+        // Somehow we might receive an invalid datetime object
+        if ((!is_null($endDate)) && ((int)$endDate->format('y') > 0)) {
+            $this->endDate = $endDate;
+        } else {
+            $this->endDate = null;
+        }
         $this->additions = [];
+        $this->exceptions = [];
+    }
+
+    public function toUpdateArray() {
+        $repeatUntilStr = null;
+        if (!is_null($this->endDate)) {
+            $repeatUntilStr = $this->endDate->format('Y-m-d H:i:s');
+        }
+
+        $result = array(
+            "repeat_id" => $this->id,
+            "repeat_frequence" => $this->frequency,
+            "repeat_option_id" => $this->optionId,
+            "repeat_until" => $repeatUntilStr,
+            "additions" => array(),
+            "exceptions" => array()
+        );
+
+        foreach($this->additions as $a) {
+            $result["additions"][$a->getID()] = $a->toUpdateArray();
+            $result["additions"][$a->getID()]["booking_id"] = $this->id;
+        }
+
+        foreach ($this->exceptions as $e) {
+            $result["exceptions"][$e->getID()] = $e->toUpdateArray();
+            $result["exceptions"][$e->getID()]["booking_id"] = $this->id;
+        }
+        return $result;
     }
 
     /**
@@ -63,7 +97,12 @@ class RepeatType
     }
 
     public function setEndDate($endDate) {
-        $this->endDate = $endDate;
+        // Somehow we might receive an invalid datetime object
+        if ((!is_null($endDate)) && ((int)$endDate->format('y') > 0)) {
+            $this->endDate = $endDate;
+        } else {
+            $this->endDate = null;
+        }
     }
 
     public function getEndDate() {
@@ -105,9 +144,6 @@ class RepeatType
     }
 
     public function getLastOccurence($startDate) {
-        if ($this->isNoRepeat() || $this->isManualRepeat() || is_null($this->endDate)) {
-            return False;
-        }
 
         // TODO: This is an ugly approach, but easiest way to implement without code too much code alternation currently
         // Architectural technical debt here!
@@ -213,7 +249,7 @@ class RepeatType
                 $closestRepetition = $a;
             }
         }
-
+        
         // Return False if we were not able to find any repetition after the given date
         if (!is_null($closestRepetition)) {
             return $closestRepetition;
@@ -386,5 +422,17 @@ class RepeatType
         return $startDate;
     }
 
+
+    /**
+     * Get the value of exceptions
+     */ 
+    public function getExceptions()
+    {
+        return $this->exceptions;
+    }
+
+    public function addException(ExceptionRepeatDate $e) {
+        $this->exceptions[$e->getId()] = $e;
+    }
 }
 

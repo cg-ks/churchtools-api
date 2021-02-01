@@ -215,33 +215,116 @@ class Booking extends CTRepeatingObject
         return $this->calendarID;
     }
 
-    /**
-     * Experimental feature to sync this local instance and all its changes back to churchtools
-     * @param RestAPI The churchtools RestAPI instance that should perform the sync call
-     */
-    public function sync($api) {
+    public function toUpdateArray() {
+        $modifiedDate = new \DateTime();
+        
         // The param array of all class variables
         $paramArray = [
             'startdate' => $this->getStartDate()->format('Y-m-d H:i:s'),
             'enddate' => $this->getEndDate()->format('Y-m-d H:i:s'),
-            'name' => "Booking",
             'id' => $this->getID(),
+            'old_id' => $this->getID(),
             'resource_id' => $this->getResourceID(),
             'person_id' => $this->getPersonID(),
             'status_id' => $this->getStatusID(),
             'text' => $this->getTitle(),
             'location' => $this->getLocation(),
             'note'  => $this->remarks,
-            'modified_date' => (new \DateTime('now'))->format('Y-m-d H:i:s'),
+            'modified_date' => $modifiedDate->format('Y-m-d H:i:s'),
             'create_date' => $this->getCreateDate()->format('Y-m-d H:i:s'),
             'version' => $this->getVersion(),
-            'neu' => 'false',
-            'func' => 'updateBooking',
             'currentEvent_id' => $this->getID(),
+            'station_id' => $this->rawDataBlocks['station_id']
         ];
 
-        // Add the raw data blocks
-        $paramArray = array_merge($paramArray, $this->rawDataBlocks);
+        // Now add the repeat information
+        $repeatArray = $this->repeatType->toUpdateArray();
+        $paramArray = array_merge($paramArray, $repeatArray);
+
+        return $paramArray;
+    }
+
+    public function toUpdateArrayWithCalendarEntry() {
+        // This booking is associated with a calendar entry
+        $modifiedDate = new \DateTime();
+
+        // This time it is like updating the event and not the booking itself
+        $calStartDate = $this->parseDateTime($this->rawDataBlocks["cal_startdate"]);
+        $calEndDate = $this->parseDateTime($this->rawDataBlocks["cal_enddate"]);
+
+        $minpre = ($calStartDate->getTimestamp() - $this->getStartDate()->getTimestamp())/60;
+        $minpost = ($this->getEndDate()->getTimestamp() - $calEndDate->getTimestamp())/60;
+
+        // The param array of all class variables
+        $paramArray = [
+            'startdate' => $calStartDate->format('Y-m-d H:i:s'),
+            'enddate' => $calEndDate->format('Y-m-d H:i:s'),
+            'id' => $this->getCalendarEntryID(),
+            'cc_cal_id' => $this->getCalendarEntryID(),
+            // The old id is still the old booking id
+            'old_id' => $this->getID(),
+            'person_id' => $this->getPersonID(),
+            'text' => $this->getTitle(),
+            'bezeichnung' => $this->getTitle(),
+            'modified_date' => $modifiedDate->format('Y-m-d H:i:s'),
+            'create_date' => $this->getCreateDate()->format('Y-m-d H:i:s'),
+            'version' => $this->getVersion(),
+            'category_id' => $this->getCalendarID(),
+            'currentEvent_id' => $this->getCalendarEntryID(),
+            'station_id' => $this->rawDataBlocks['station_id'],
+            'cal_startdate' => $calStartDate->format('Y-m-d H:i:s'),
+            'cal_enddate' => $calEndDate->format('Y-m-d H:i:s'),
+            'booking_id' => $this->getID(),
+            'bookings' => array($this->getID() => array(
+                'id' => $this->getID(),
+                'resource_id' => $this->getResourceID(),
+                'status_id' => $this->getStatusID(),
+                'location' => $this->getLocation(),
+                'note'  => $this->remarks,      
+                'minpre' => $minpre,
+                'minpost' => $minpost
+            )
+        )
+        ];
+
+
+        // Now add the repeat information
+        $repeatArray = $this->repeatType->toUpdateArray();
+        $paramArray = array_merge($paramArray, $repeatArray);
+
+        return $paramArray;     
+    }
+
+    /**
+     * Experimental feature to sync this local instance and all its changes back to churchtools
+     * @param RestAPI The churchtools RestAPI instance that should perform the sync call
+     */
+    public function sync($api) {
+        $paramArray = NULL;
+
+        if (is_null($this->getCalendarID())) {
+            // No calendar associated with this
+            $paramArray = $this->toUpdateArray();
+            // The default parameters for a update booking call
+            $paramArray2 = array(
+                'name' => "Booking",
+                'neu' => 'false',
+                'func' => 'updateBooking',
+            );
+            // Add the raw data blocks
+            $paramArray = array_merge($paramArray, $paramArray2);
+        } else {
+            // This booking has a calendar associated with it
+            $paramArray = $this->toUpdateArrayWithCalendarEntry();
+            // The default parameters for a update booking call
+            $paramArray2 = array(
+                'name' => "Event",
+                'neu' => 'false',
+                'func' => 'updateEvent',
+            );
+            // Add the raw data blocks
+            $paramArray = array_merge($paramArray, $paramArray2);
+        }
         // Now call the API
         $rawData = $api->callApi('churchresource/ajax', $paramArray);
         return $rawData;

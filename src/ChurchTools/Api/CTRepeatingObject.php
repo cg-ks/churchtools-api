@@ -56,6 +56,12 @@ class CTRepeatingObject extends CTObject
                 foreach ($blockData as $ard) {
                     $this->repeatType->addAddition(new AdditionalRepeatDate(array("data" => $ard)));
                 }
+            break;
+            case 'exceptions':
+                foreach ($blockData as $e) {
+                    $this->repeatType->addException(new ExceptionRepeatDate(array("data" => $e)));
+                }
+            break;
             default:
                 parent::handleDataBlock($blockName, $blockData);
         }

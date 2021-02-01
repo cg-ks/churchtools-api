@@ -4,16 +4,15 @@ declare(strict_types=1);
 namespace ChurchTools\Api;
 
 /**
- * Represents an additional, non-regular repetition date of a recurring CT Object (CTRepeatingObject)
+ * Represents an additional exception date of a recurring CT Object (CTRepeatingObject)
  * 
  * @author Lukas Block
  */
 
-class AdditionalRepeatDate extends CTObject
+class ExceptionRepeatDate extends CTObject
 {
     private $id;
     private $date;
-    private $repeat = false;
     
 
     /**
@@ -25,11 +24,11 @@ class AdditionalRepeatDate extends CTObject
             case 'id':
                 $this->id = intval($blockData);
                 break;
-            case 'add_date':
+            case 'except_date_start':
                 $this->date = $this->parseDateTime($blockData);
                 break;
-            case 'with_repeat_yn':
-                $this->repeat = boolval($blockData);
+            case 'except_date_end':
+                $this->date = $this->parseDateTime($blockData);
                 break;
             default:
                 parent::handleDataBlock($blockName, $blockData);
@@ -39,8 +38,8 @@ class AdditionalRepeatDate extends CTObject
     public function toUpdateArray() {
         return array(
             "id" => $this->id,
-            "add_date" => $this->date->format('Y-m-d H:i:s'),
-            "with_repeat_yn" => strval($this->repeat)
+            "except_date_start" => $this->date->format('Y-m-d H:i:s'),
+            "except_date_end" => $this->date->format('Y-m-d H:i:s'),
         );
     }
 
@@ -58,13 +57,5 @@ class AdditionalRepeatDate extends CTObject
     public function getDate()
     {
         return $this->date;
-    }
-
-    /**
-     * Get the value of repeat
-     */ 
-    public function isRepeat()
-    {
-        return $this->repeat;
     }
 }
