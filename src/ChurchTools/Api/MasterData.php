@@ -60,7 +60,8 @@ class MasterData extends CTObject
                 $this->userName    = $blockData;
                 break;
             case 'userid':
-                $this->userID      = intval($blockData);
+                // userID has a very stupid format!
+                $this->userID      = intval(explode("]", explode("[", $blockData)[1])[0]);
                 break;
             case 'category':
                 $this->calendars   = new Calendars($blockData, false);
@@ -186,4 +187,9 @@ class MasterData extends CTObject
     {
         return $this->firstDayInWeek;
     }
+
+    public function getUserID() {
+        return $this->userID;
+    }
 }
+
