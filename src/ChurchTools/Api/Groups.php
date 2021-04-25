@@ -52,8 +52,7 @@ class Groups extends CTObject
         $groups = [];
         foreach ($this->groups as $group) {
             $id        = $group->getID();
-            $order     = $group->getSortKey();
-            $groups[$id] = $order;
+            $groups[$id] = $id;
         }
         if ($sorted) {
             asort($groups);
