@@ -259,6 +259,13 @@ class RepeatType
     }
 
     public function getNextSingleOccurenceAfter($start, $after) {
+        // Sadly, sometimes churchtools sets an invalid end date (like 0000-00-00) for recurring types, if you enter it manually for example
+        // This leads to infinite loops and undefined behavior for everything, that is not manual repeat or no repeat
+        // As such, we will cancel only continue we do not have a repeat type and the next date is obvious, because $start >= $after
+        if ( is_null($this->endDate) && (!($this->isManualRepeat() || $this->isNoRepeat())) && ($start < $after) ) {
+            return False;
+        }
+
         $result = null;
         // Now check which subroutine to call
         if ($this->isDailyRepeat()) {
@@ -435,4 +442,5 @@ class RepeatType
         $this->exceptions[$e->getId()] = $e;
     }
 }
+
 
